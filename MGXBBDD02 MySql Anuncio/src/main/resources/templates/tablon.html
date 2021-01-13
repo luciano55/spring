@@ -1,0 +1,26 @@
+<html>
+
+<body>
+  <h1>Tablón Anuncios</h1>
+
+
+  <span th:text="${anuncios}"></span>
+
+  <div th:each="item, iterator : ${anuncios}">
+    <a th:with="baseUrl=('/anuncio/'  + ${iterator.index + 1})" th:href="@{${baseUrl}}"><span
+        th:text="${item.asunto}"></span></a>
+    <a th:with="baseUrl=('/anuncio/eliminar/'  + ${item.id})" th:href="@{${baseUrl}}"><span>Eliminar:<span
+          th:text="${item.id}"></span></span></a>
+
+  </div>
+  <!---     <div th:each="item, iterator : ${anuncios}">
+    <a th:with="baseUrl=('/anuncio/'  + ${iterator.index + 1})" th:href="@{${baseUrl}}"><span
+        th:text="${item.asunto}"></span></a>
+  </div> -->
+
+
+  <br>
+  <a href="nuevoAnuncio.html">Nuevo anuncio</a>
+</body>
+
+</html>

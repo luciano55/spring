@@ -1,0 +1,19 @@
+<html>
+
+<body>
+  <h1>Flickr search for <span th:text=${search}></span></h1>
+
+  <td th:text="${photos} ? 'FOTO' : 'RETIRED' " />
+
+  <tr th:each="photo, iterator: ${photos}">
+    <span th:text=${iterator.index}></span>
+    <img th:src="${photo}" alt="image" width="300" height="200">
+  </tr>
+  <!--{{#photos}}
+  <img src='{{.}}'>
+  {{/photos}}-
+<td th:text="${photo.title}" />-->
+
+</body>
+
+</html>

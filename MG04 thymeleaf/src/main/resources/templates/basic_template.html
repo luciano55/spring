@@ -1,0 +1,22 @@
+<html>
+
+<body>
+  <!--   <p>Hello, {{name}}</p>
+  {{#silent}}
+  <p>Hello!</p>
+  {{/silent}}  -->
+  <p>Hello! <span th:text="${name}"></span></p>
+
+  <div th:if="${silent}">
+    <h2>Silent:
+      <span th:text="${silent}"></span>
+    </h2>
+
+  </div>
+
+
+
+
+</body>
+
+</html>

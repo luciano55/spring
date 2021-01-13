@@ -1,0 +1,30 @@
+<html>
+
+<body>
+
+
+  <h1 th:text="${bienvenida} ? 	'Bienvenido' : ''" />
+  <h1>Tablón Anuncios</h1>
+
+  <ul th:each="anuncio: ${anuncios}">
+    <ul>
+      <li th:text="${anuncio.nombre}"></li>
+      <li th:text="${anuncio.asunto}"></li>
+      <li th:text="${anuncio.comentario}"></li>
+    </ul>
+
+    </li>
+  </ul>
+
+  <!-- 
+  <ul th:each=”libro : ${libros}” <h2 th:text="${anuncios}">
+    </h2>{{#anuncios}}
+    <a href="anuncio/{{-index}}">{{nombre}} {{asunto}}</a><br>
+    {{/anuncios}}
+-->
+  <br>
+
+  <a href="/anuncio/nuevo_form">Mi Nuevo anuncio</a>
+</body>
+
+</html>
