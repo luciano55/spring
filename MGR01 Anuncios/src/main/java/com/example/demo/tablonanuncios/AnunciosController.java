@@ -86,6 +86,7 @@ public class AnunciosController {
   @RequestMapping("/gatito")
   public void gato(HttpServletResponse response) throws FileNotFoundException, IOException {
     response.addHeader("Content-type", "image/jpeg");
-    IOUtils.copy(new FileInputStream("C:\\2020Verano II\\spring\\MGR01\\gato.jpg"), response.getOutputStream());
+    IOUtils.copy(new FileInputStream("C:\\2020Verano II\\spring\\MGR01 Anuncios\\gato.jpg"),
+        response.getOutputStream());
   }
 }

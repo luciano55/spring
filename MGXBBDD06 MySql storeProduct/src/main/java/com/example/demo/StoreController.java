@@ -6,6 +6,7 @@ import javax.annotation.PostConstruct;
 
 import com.example.demo.model.Productstore;
 
+import org.aspectj.weaver.Lint;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,13 +26,13 @@ public class StoreController {
   public void init() {
   }
 
-  @RequestMapping("/store")
-
+  @RequestMapping("/store/")
   public String store(Model model, @PageableDefault(sort = { "modelo", "proveedor" }, value = 4)
 
   Pageable page) {
 
     Page<Productstore> productos = repository.findAll(page);
+
     model.addAttribute("productos", productos);
 
     model.addAttribute("showNext", !productos.isLast());
