@@ -1,4 +1,5 @@
 import api from "../helpers/harni_api.js";
+
 export function Title(){
   let fechaActual = new Date(Date.now()).toLocaleTimeString();
   const $h1 = document.createElement("h1");

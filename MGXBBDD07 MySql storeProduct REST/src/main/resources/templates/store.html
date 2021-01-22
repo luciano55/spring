@@ -9,7 +9,7 @@
     <a th:with="baseUrl=('/producto/'  + ${producto.id})" th:href="@{${baseUrl}}"><span
         th:text="${producto.modelo}"></span></a>
 
-    <span th:text="${producto.precio}"></span></a>
+    <span th:text="${producto.precio}"></span>
   </div>
 
   <span th:if="${showPrev}"><a th:with="

@@ -46,14 +46,9 @@ public class StoreController {
   @RequestMapping("/producto/{id}")
   public String verAnuncio(Model model, @PathVariable long id) {
 
-    Optional<Productstore> productox = repository.findById(id);
+    Optional<Productstore> producto = repository.findById(id);
 
-    System.out.println("producto:" + productox.get().getDescuento());
-    Productstore productstore = new Productstore(productox.get().getId(), productox.get().getIdProducto(),
-        productox.get().getReferencia(), productox.get().getModelo(), productox.get().getIdProveedor(),
-        productox.get().getProveedor(), productox.get().getPrecio(), productox.get().getStock(),
-        productox.get().getDescuento(), productox.get().getMemoria());
-    model.addAttribute("producto", productstore);
+    model.addAttribute("producto", producto.get());
 
     return "ver_producto";
   }

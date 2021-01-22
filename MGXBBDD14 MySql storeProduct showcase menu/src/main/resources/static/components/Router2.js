@@ -6,27 +6,44 @@ import {PostCardDetail} from "./PostCardDetail.js";
 
 export async function Router2(){
 
+  var APP = APP || {}
+  sessionStorage.setItem("showcaseType", "showcaseshmJM");
 
  document.addEventListener("click", (e)=>{
+    let uri = api.API_HARNINA;
      switch (e.target.id ) {
-      case 'firstPage': callApiRest(uri);
-      break;
-      case 'previousPage': callApiRest(uri+document.getElementById("previousPage").dataset.valor);
+      case 'firstPage': 
+        callApiRest(uri);
+         break;
+      case 'previousPage': 
+        callApiRest(uri+document.getElementById("previousPage").dataset.valor);
         break;
       case 'nextPage': 
          callApiRest(uri+ document.getElementById("nextPage").dataset.valor);
         break;
-      case 'endPage': callApiRest(uri+3);
+      case 'endPage': 
+        callApiRest(uri+document.getElementById("endPage").dataset.valor);
         break;
-      /*
-      case 'showcaseshmJM': alert("showcaseshmJM");
-       case 'showcaseshmCarrusel': alert("showcaseshmCarrusel");
-        case 'showcaseshmJesadri': alert("showcaseshmJesadri");
-         case 'showcaseshmExamen': alert("showcaseshmExamen");*/
+     
+      case 'showcaseshmJM': 
+         sessionStorage.setItem("showcaseType", "showcaseshmJM");
+         renderShowcase();        
+         break;
+         
+      case 'showcaseshmCarrusel': 
+           sessionStorage.setItem("showcaseType", "showcaseshmCarrusel");
+            renderShowcase();
+           break;
+      case 'showcaseshmJesadri': 
+              sessionStorage.setItem("showcaseType", "showcaseshmJesadri");
+             renderShowcase();
+              break;
+      case 'showcaseshmExamen':
+             sessionStorage.setItem("showcaseType", "showcaseshmExamen");
+             renderShowcase();
+             break;
      }    
   });
-}
-
 const menuPage = function(posts){
        console.log(posts);
        document.getElementById("currentPage").innerHTML = posts.pageable.pageNumber + 1;
@@ -43,24 +60,65 @@ const menuPage = function(posts){
           document.getElementById("endPage").style.display = "none";
       }else {         
           document.getElementById("nextPage").dataset.valor = posts.pageable.pageNumber + 1;
+           document.getElementById("endPage").dataset.valor = posts.totalPages - 1;
           document.getElementById("nextPage").style.display = "block";
           document.getElementById("endPage").style.display = "block";
        }                  
+}
+const renderShowcaseShmJM = function(){
+       let html = "";
+       APP.data.content.forEach(post => {
+            html += PostCard(post);
+        }); 
+       document.getElementById("main").innerHTML=html;   
+}
+const renderShowcaseShmCarrusel = function(){
+       let html = "Hola Carrusel";      
+       document.getElementById("main").innerHTML=html;   
+}
+const renderShowcaseShmJesadri = function(){
+       let html = "Hola Jesadri";      
+       document.getElementById("main").innerHTML=html;   
+}
+const renderShowcaseShmExamen = function(){
+       let html = "Hola Examen";      
+       document.getElementById("main").innerHTML=html;   
+}
+const renderShowcase = function(){
+ // const myPosts = posts || APP.data;
+  
+  switch (sessionStorage.getItem("showcaseType")) {                        
+          case 'showcaseshmJM': 
+                         renderShowcaseShmJM();
+                          break;
+          case 'showcaseshmCarrusel': 
+                          renderShowcaseShmCarrusel();
+                            break;
+                   
+          case 'showcaseshmJesadri':
+                           renderShowcaseShmJesadri();
+                            break;
+                        
+           case 'showcaseshmExamen': 
+                          renderShowcaseShmExamen();
+                            break;
+                        }
+                  
 }
 const  callApiRest = async function(uri){  
    await  ajax({
               url:uri,
               cbSuccess : (posts)=>{
-                    let html = "";
-                    menuPage(posts);
-                    posts.content.forEach(post => {                        
-                         
-                          html += PostCard(post);
-                    }); 
-                   document.getElementById("main").innerHTML=html;
+                 APP.data =  posts;
+                 menuPage(posts);
+                 renderShowcase();              
               }
         });
  document.querySelector(".loader").style.display = "none";
 }
-let uri = api.API_HARNINA;
- callApiRest(uri);
+
+ callApiRest(api.API_HARNINA);
+
+}
+
+

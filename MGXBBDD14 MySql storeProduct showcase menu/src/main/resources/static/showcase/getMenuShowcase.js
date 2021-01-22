@@ -60,15 +60,15 @@
         header.className = params.class || "";
         return header;
     };
-const label = function(params){    
-        var label = document.createElement("label");
-        label.id = params.id;
-        label.className = params.class || "";
-        label.htmlFor = params.for || "";
-        label.innerHTML = params.title || "";
-        label.dataset.change = params.change || "";
-        return label;    
-};
+  const label = function(params){    
+          var label = document.createElement("label");
+          label.id = params.id;
+          label.className = params.class || "";
+          label.htmlFor = params.for || "";
+          label.innerHTML = params.title || "";
+          label.dataset.change = params.change || "";
+          return label;    
+  };
 
 // ManagerShowCase
 
@@ -79,6 +79,13 @@ const  changeShowcase = function(evt){
 
         //STORE.ManagerShowcase.createShowcase();
     };
+
+
+
+
+
+
+
 
 const   createShowcase =  function(opcion){
         if(STORE.ManagerShowcase.showcaseType == "shmLuqui") {
