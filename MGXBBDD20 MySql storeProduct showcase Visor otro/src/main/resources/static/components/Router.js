@@ -6,8 +6,13 @@ import {PostCardDetail} from "./PostCardDetail.js";
 import { Swipper } from "../showcase/swipper/swipper.js";
 import { MySwiper } from "../showcase/swipper/mySwiper.js";
 import { Carrusel } from "../showcase/carrusel/carrusel.js";
+import { d,$,lS,sS } from "./DomFunction.js";
+import { ImageSlider } from "../showcase/imageSlider/imageSlider.js";
+import { MyImageSlider } from "../showcase/imageSlider/myImageSlider.js";
+
 
 export async function Router(){
+  
     //El State
     const state = {
       data: {} ,
@@ -22,7 +27,7 @@ export async function Router(){
       }
     }
 //Obtenemos una copia inmutable del State
-   //const getState = () => JSON.parse(JSON.stringify(state)); // de poco ingeniero   
+ // const getState = () => JSON.parse(JSON.stringify(state)); // de poco ingeniero   
    // const getState = () => {... state }; por babel array si object NO
    //const getState = () => Object.assign({}, state);
    const getState = () => Object.create(state);
@@ -31,17 +36,46 @@ export async function Router(){
         localStorage.setItem("showcaseType", "showcaseshmJM"); 
   }
    let {hash} = location;
+   
+  $("changeshowcase").addEventListener("click",(e)=>{
+       switch (e.target.id ) {
+            case 'showcaseshmJM': 
+              localStorage.setItem("showcaseType", "showcaseshmJM");
+              renderShowcase();        
+              break;         
+            case 'showcaseshmCarrusel': 
+                localStorage.setItem("showcaseType", "showcaseshmCarrusel");
+                renderShowcase();
+                break;
+            case 'showcaseshmJesadri': 
+                localStorage.setItem("showcaseType", "showcaseshmJesadri");
+                renderShowcase();
+                break;
+            case 'showcaseshmSwipper':
+                  localStorage.setItem("showcaseType", "showcaseshmSwipper");
+                  renderShowcase();
+                  break;   
+        }
+   });
+  $("main").addEventListener("click",(e)=>{
+     switch (e.target.id ) {
+            case 'cardDetail': 
+              renderShowcase();
+              break;         
+            case 'seeMobil': 
+            case 'carrusel': 
+              renderDetail(e.target.dataset.valor);      
+              break; 
+      }  
+   });
+  $("div_menu_page").addEventListener("click",(e)=>{
+       let uri = api.API_HARNINA;
 
-   document.addEventListener("click",(e)=>{
-        //alert(e.target.dataset.valor);
-           let uri = api.API_HARNINA;
         const pageActive= e.target.innerHTML;
         if(pageActive>0){
-          callApiRest(uri+(pageActive - 1));
-        }
+          callApiRest(uri+(pageActive - 1));        }
  
-     switch (e.target.id ) {// menu paginación
-
+     switch (e.target.id ) {
       case 'botonInicio':
           callApiRest(uri+document.getElementById("botonInicio").dataset.valor);
           break;
@@ -56,8 +90,6 @@ export async function Router(){
          callApiRest(uri+document.getElementById("botonPrev").dataset.valor);
           break;
 
-
-
       case 'firstPage': 
         callApiRest(uri);
          break;
@@ -70,43 +102,85 @@ export async function Router(){
       case 'endPage': 
         callApiRest(uri+document.getElementById("endPage").dataset.valor);
         break;  
-        // menu Visores
-      case 'showcaseshmJM': 
-         localStorage.setItem("showcaseType", "showcaseshmJM");
-         renderShowcase();        
-         break;         
-      case 'showcaseshmCarrusel': 
-           localStorage.setItem("showcaseType", "showcaseshmCarrusel");
-           renderShowcase();
-           break;
-      case 'showcaseshmJesadri': 
-           local.setItem("showcaseType", "showcaseshmJesadri");
-           renderShowcase();
-           break;
-      case 'showcaseshmSwipper':
-             localStorage.setItem("showcaseType", "showcaseshmSwipper");
-             renderShowcase();
-             break;   
-      // Regresar y Ver Mobil 
-       case 'cardDetail': 
-         renderShowcase();
-         break;         
-      case 'seeMobil': 
-      case 'carrusel': 
-         renderDetail(e.target.dataset.valor);      
-         break;   
-      
-
-     }    
-
-
-
-
+     }  
    });
 
+const renderShowcase = function(){
+   document.getElementById("div_menu_page").style.display ="block";
+   document.getElementById("changeshowcase").style.display ="block";
+   let html;
+  switch (localStorage.getItem("showcaseType")) {   
+      
+          case '':                          
+          case 'showcaseshmJM': 
+              document.getElementById('showcaseshmJM').checked = true;
+             document.getElementById("main").innerHTML = render(PostCard);
+              break;
+          case 'showcaseshmCarrusel': 
+            document.getElementById('showcaseshmCarrusel').checked = true;
+            renderShowcaseShmCarrusel();
+            break;
+          case 'showcaseshmJesadri':
+              document.getElementById('showcaseshmJesadri').checked = true;
+              html = "<div class='bodyImg' id='bodyImg'><div class='slider-container'>";
+              html += render(ImageSlider);
+              html +=  "<button class='arrow left-arrow' id='left'><i class='fas fa-arrow-left'></i></button><button class='arrow right-arrow' id='right'><i class='fas fa-arrow-right'></i></button> </div></div>";
+              document.getElementById("main").innerHTML = html ;      
 
+              MyImageSlider();       
+             break;                        
+           case 'showcaseshmSwipper': 
+               document.getElementById('showcaseshmSwipper').checked = true;
+               html = "<div class='swiper-container'> <div class='swiper-wrapper'>";      
+               html += render(Swipper);
+               html += "</div>";
+               html += "<div class='swiper-pagination'></div>  <div class='swiper-scrollbar'></div></div>" ;
+              document.getElementById("main").innerHTML=html;  
 
-const menuPage = function(){
+              MySwiper();
+               break;
+   }
+                  
+}
+const render = function(showcase){
+   let html = "";
+        const data = getState().data;
+      data.content.forEach(post => {
+            html += showcase(post);
+        }); 
+    return html;   
+}
+const renderShowcaseShmCarrusel = function(){
+    let html = "";
+     document.getElementById("main").innerHTML= "";   
+    let $giran = document.createElement("div");
+    $giran.id = "giran";
+    document.getElementById("main").appendChild($giran);
+    $giran  = document.getElementById("giran");
+    const data = getState().data;
+    let i = 0;
+    data.content.forEach(post => {
+          $giran.appendChild(Carrusel(post, i, data.content.length));       
+           i++;        
+     });      
+
+}
+
+const renderDetail = async function(id){
+   document.querySelector(".loader").style.display = "block";
+              await  ajax({
+                                    url:"http://localhost:8085/storerest/" + id,
+                                      cbSuccess : (post)=>{
+                                        console.log(post);
+                                        let html = PostCardDetail(post);
+                                        document.getElementById("main").innerHTML=html;
+                                      }
+                        })
+        document.getElementById("div_menu_page").style.display ="none";
+        document.getElementById("changeshowcase").style.display ="none";
+        document.querySelector(".loader").style.display = "none";
+}
+const renderMenuPage = function(){
     const posts =  getState().data;
        console.log(posts);
        document.getElementById("currentPage").innerHTML = posts.pageable.pageNumber + 1;
@@ -128,110 +202,26 @@ const menuPage = function(){
           document.getElementById("endPage").style.display = "block";
        }                  
 }
-const renderShowcaseShmJM = function(){
-       let html = "";
-        const data = getState().data;
-      data.content.forEach(post => {
-            html += PostCard(post);
-        }); 
-       document.getElementById("main").innerHTML=html;   
-}
-const renderShowcaseShmCarrusel = function(){
-    let html = "";
-     document.getElementById("main").innerHTML= "";   
-    let $giran = document.createElement("div");
-    $giran.id = "giran";
-    document.getElementById("main").appendChild($giran);
-    $giran  = document.getElementById("giran");
-    const data = getState().data;
-    let i = 0;
-    data.content.forEach(post => {
-          $giran.appendChild(Carrusel(post, i, data.content.length));       
-           i++;        
-     });      
-
-}
-const renderShowcaseShmJesadri = function(){
-       let html = "Hola Jesadri";      
-       document.getElementById("main").innerHTML=html;   
-}
-const renderShowcaseSwipper = function(){
-       let html = "<div class='swiper-container'> <div class='swiper-wrapper'>";      
-       const data = getState().data;
-       data.content.forEach(post => {
-            html += Swipper(post);          
-        }); 
-        html += "</div>";
-         html += "<div class='swiper-pagination'></div>  <div class='swiper-scrollbar'></div></div>" ;
-       document.getElementById("main").innerHTML=html;   
-        MySwiper();
-}
-const renderShowcase = function(){
-   document.getElementById("div_menu_page").style.display ="block";
-   document.getElementById("changeshowcase").style.display ="block";
-  switch (localStorage.getItem("showcaseType")) {   
-      
-         case '': 
-               document.getElementById('showcaseshmJM').checked = true;
-                         renderShowcaseShmJM();
-                          break;                   
-          case 'showcaseshmJM': 
-                        document.getElementById('showcaseshmJM').checked = true;
-                         renderShowcaseShmJM();
-                          break;
-          case 'showcaseshmCarrusel': 
-            document.getElementById('showcaseshmCarrusel').checked = true;
-                          renderShowcaseShmCarrusel();
-                            break;
-                   
-          case 'showcaseshmJesadri':
-              document.getElementById('showcaseshmJesadri').checked = true;
-                           renderShowcaseShmJesadri();
-                            break;
-                        
-           case 'showcaseshmSwipper': 
-                 document.getElementById('showcaseshmSwipper').checked = true;
-                          renderShowcaseSwipper();
-                            break;
-                        }
-                  
-}
-const renderDetail = async function(id){
-   document.querySelector(".loader").style.display = "block";
-              await  ajax({
-                                    url:"http://localhost:8085/storerest/" + id,
-                                      cbSuccess : (post)=>{
-                                        console.log(post);
-                                        let html = PostCardDetail(post);
-                                        document.getElementById("main").innerHTML=html;
-                                      }
-                        })
-        document.getElementById("div_menu_page").style.display ="none";
-        document.getElementById("changeshowcase").style.display ="none";
-        document.querySelector(".loader").style.display = "none";
-}
 const  callApiRest = async function(uri){  
    await  ajax({
               url:uri,
               cbSuccess : (posts)=>{
+                state.data = posts;
+                
                 setState({
                      data: posts 
-                  });
-                // APP.data =  posts;
-                 document.getElementById("changeshowcase").style.display ="block";
-                 document.getElementById("div_menu_page").style.display ="block";
+                  });               
               
-                 if(getState().menuPage=="FooterPage"){menuPage();}
-                 //else  if(state.menuPage=="FooterPageButton"){}
+                 if(getState().menuPage == "FooterPage"){renderMenuPage();}              
                
                  renderShowcase();              
               }
         });
- document.querySelector(".loader").style.display = "none";
+ document.querySelector(".loader").style.display = "none"; 
 }
- if(!hash || hash === "#/"){  
-    console.log("/",getState());    
-     callApiRest(api.API_HARNINA);
+ if(!hash || hash == "#/"){      
+    console.log("/",getState());
+     callApiRest(api.API_HARNINA);    
  }else if(hash.includes("#/post/")){ 
           console.log("/post/",getState());          
         const post = hash.split("/");

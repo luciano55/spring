@@ -14,7 +14,7 @@ export function App(){
   Header($root);
   $root.appendChild(Main());
   $root.appendChild(Loader());
-$root.appendChild(FooterPage());
+  $root.appendChild(FooterPage());
   FooterPageButton();
   Router();
 }
