@@ -16,7 +16,8 @@ export async function Router(){
     //El State
     const state = {
       data: {} ,
-      menuPage: "FooterPage"
+      menuPage: "FooterPage",
+      pageActive:1
     }
     //Actualizar el State de forma reactiva
     const setState = obj => {
@@ -27,10 +28,10 @@ export async function Router(){
       }
     }
 //Obtenemos una copia inmutable del State
- // const getState = () => JSON.parse(JSON.stringify(state)); // de poco ingeniero   
+  const getState = () => JSON.parse(JSON.stringify(state)); // de poco ingeniero   
    // const getState = () => {... state }; por babel array si object NO
-   //const getState = () => Object.assign({}, state);
-   const getState = () => Object.create(state);
+   //const getState = () => Object.assign({}, state); // Mutable
+  // const getState = () => Object.create(state); // es mutable
 
   if(!localStorage.getItem("showcaseType")){
         localStorage.setItem("showcaseType", "showcaseshmJM"); 
@@ -54,7 +55,21 @@ export async function Router(){
             case 'showcaseshmSwipper':
                   localStorage.setItem("showcaseType", "showcaseshmSwipper");
                   renderShowcase();
-                  break;   
+                  break;  
+            case 'sizeVisorI' :
+              let visorSize =  localStorage.getItem("visorSize");
+              let activePage =   localStorage.getItem("activePage");
+              visorSize--;
+              if (sizeVisor > 0){
+                  let  url = api.API_HARNINA + activePage  + "&size=" +visorSize;
+                  callApiRest(url);   
+                  localStorage.setItem("visorSize",visorSize); 
+                   // if  (activePage < getState().data.totalelements/visorSize  or getState().data.pageable.pageSize)                 else {localStorage.setItem("activePage",1);}
+           
+              }
+              
+
+              break;    
         }
    });
   $("main").addEventListener("click",(e)=>{
@@ -77,30 +92,30 @@ export async function Router(){
  
      switch (e.target.id ) {
       case 'botonInicio':
-          callApiRest(uri+document.getElementById("botonInicio").dataset.valor);
+          callApiRest(uri+document.getElementById("botonInicio").dataset.valor + "&size=6");
           break;
       case 'botonEnd':
-          callApiRest(uri+document.getElementById("botonEnd").dataset.valor);
+          callApiRest(uri+document.getElementById("botonEnd").dataset.valor+ "&size=6");
           break;
      case 'botonNext':
-         callApiRest(uri+document.getElementById("botonNext").dataset.valor);
+         callApiRest(uri+document.getElementById("botonNext").dataset.valor+ "&size=6");
           break;
 
      case 'botonPrev':
-         callApiRest(uri+document.getElementById("botonPrev").dataset.valor);
+         callApiRest(uri+document.getElementById("botonPrev").dataset.valor+ "&size=6");
           break;
 
       case 'firstPage': 
         callApiRest(uri);
          break;
       case 'previousPage': 
-        callApiRest(uri+document.getElementById("previousPage").dataset.valor);
+        callApiRest(uri+document.getElementById("previousPage").dataset.valor+ "&size=6");
         break;
       case 'nextPage': 
-         callApiRest(uri+ document.getElementById("nextPage").dataset.valor);
+         callApiRest(uri+ document.getElementById("nextPage").dataset.valor+ "&size=6");
         break;
       case 'endPage': 
-        callApiRest(uri+document.getElementById("endPage").dataset.valor);
+        callApiRest(uri+document.getElementById("endPage").dataset.valor+ "&size=6");
         break;  
      }  
    });
@@ -144,8 +159,18 @@ const renderShowcase = function(){
 }
 const render = function(showcase){
    let html = "";
-        const data = getState().data;
-      data.content.forEach(post => {
+   let visorSize = lS.getItem("visorSize");
+   let activePage = sS.getItem("activePage");
+  let inicio = activePage == 1 ? 0 : (activePage * visorSize) - visorSize;
+  let final = inicio == 0 ?  visorSize -1 : inicio +  (visorSize - 1);
+  const data = getState().data;
+  let subData = [];
+
+      for(let i = inicio; i<= final; i++){
+          subData.push(data.content[i]);
+      }
+
+      subData.forEach(post => {
             html += showcase(post);
         }); 
     return html;   
@@ -212,7 +237,7 @@ const  callApiRest = async function(uri){
                      data: posts 
                   });               
               
-                 if(getState().menuPage == "FooterPage"){renderMenuPage();}              
+               //  if(getState().menuPage == "FooterPage"){renderMenuPage();}              
                
                  renderShowcase();              
               }

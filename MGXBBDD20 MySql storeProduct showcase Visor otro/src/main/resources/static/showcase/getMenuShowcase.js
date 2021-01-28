@@ -33,6 +33,15 @@
             params.change = i + 1;
             header.appendChild(label(params));
         }
+        const  botonI = document.createElement("span");
+        botonI.id = "sizeVisorI";
+        botonI.innerHTML = "&#9668;<<";
+        header.appendChild(botonI);
+        const  botonD = document.createElement("span");
+        botonD.id = "sizeVisorD"
+        botonD.innerHTML = ">>&#9658;";
+        header.appendChild(botonD);
+
        showcaseTypeContainer.appendChild(header);
        node.appendChild(showcaseTypeContainer);
        

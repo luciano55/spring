@@ -1,12 +1,14 @@
-export function FooterPageButton(){
+export function FooterPageButton(cacheSize){
 
   const $menu = document.createElement("footer");
   $menu.classList.add("footer");
 
 var init = function() {
-    Pagination.Init(document.getElementById('pagination'), {
-        size: Math.ceil(15/4), // pages size= rowsTotal / rowsPage
-        activePage: 1,  // selected page
+   const visorSize  = localStorage.getItem("visorSize");
+   const activePage = localStorage.getItem("activePage");
+    Pagination.Init(document.getElementById('pagination'), {       
+        size: Math.ceil(cacheSize/visorSize), // pages size= rowsTotal / rowsPage
+        activePage:  activePage, // selected page
         step: 1   // pages before and after current
     });
 };
@@ -23,8 +25,8 @@ const Pagination = {
     Constructor: function(data) {
         data = data || {};
         Pagination.sizeStatic = data.size || 30;
-        Pagination.size = data.size;
-        Pagination.page = data.page || 1; //¿?
+        Pagination.size = data.size || 30;
+        Pagination.activePage = data.activePage || 1; 
         Pagination.step = data.step || 3;
     },
    Create: function(menu) {
@@ -47,24 +49,24 @@ const Pagination = {
          nav[0].dataset.valor = 0;
         nav[0].addEventListener('click', Pagination.Inicio, false);
         nav[1].id = "botonPrev";
-        nav[2].dataset.valor = 0;
+        nav[1].dataset.valor = 0;
         nav[1].addEventListener('click', Pagination.Prev, false);
         nav[2].id = "botonNext";
         nav[2].dataset.valor = 1;
         nav[2].addEventListener('click', Pagination.Next, false);
         nav[3].id = "botonEnd";
-        nav[3].dataset.valor = 3;
+        nav[3].dataset.valor = Pagination.size - 1;
         nav[3].addEventListener('click', Pagination.End, false);
     },
    Start: function() {
-        if (Pagination.page == 1) {
+        if (Pagination.activePage == 1) {
             document.getElementById('botonInicio').style.display ="none";
             document.getElementById('botonPrev').style.display ="none";
         }else {
             document.getElementById('botonInicio').style.display ="";
             document.getElementById('botonPrev').style.display ="";
         }
-        if (Pagination.page == Pagination.sizeStatic ) {
+        if (Pagination.activePage == Pagination.sizeStatic ) {
             document.getElementById('botonNext').style.display ="none";
             document.getElementById('botonEnd').style.display ="none";
         }else {
@@ -75,17 +77,17 @@ const Pagination = {
         if (Pagination.size < Pagination.step * 2 + 6) {
             Pagination.Add(1, Pagination.size + 1);
         }
-        else if (Pagination.page < Pagination.step * 2 + 1) {
+        else if (Pagination.activePage < Pagination.step * 2 + 1) {
             Pagination.Add(1, Pagination.step * 2 + 4);
             Pagination.Last();
         }
-        else if (Pagination.page > Pagination.size - Pagination.step * 2) {
+        else if (Pagination.activePage > Pagination.size - Pagination.step * 2) {
             Pagination.First();
             Pagination.Add(Pagination.size - Pagination.step * 2 - 2, Pagination.size + 1);
         }
         else {
             Pagination.First();
-            Pagination.Add(Pagination.page - Pagination.step, Pagination.page + Pagination.step + 1);
+            Pagination.Add(Pagination.activePage - Pagination.step, Pagination.activePage + Pagination.step + 1);
             Pagination.Last();
         }
         Pagination.Finish();
@@ -114,41 +116,42 @@ const Pagination = {
     // change page
     Click: function(evt) {
        // alert(evt.currentTarget.innerHTML );
-        Pagination.page = +this.innerHTML;
+        Pagination.activePage = +this.innerHTML;
         Pagination.Start();
     },
     
     // inicio PAge
     Inicio: function(){
         Pagination.size = Pagination.sizeStatic;
-        Pagination.page = 1;
+        Pagination.activePage = 1;
         Pagination.Start();
     },
 
     // previous page
     Prev: function() {    
        document.getElementById("botonPrev").dataset.valor = Pagination.page -2;    
-        Pagination.page--;
-        if (Pagination.page < 1) {
-            Pagination.page = 1;
+        Pagination.activePage--;
+        if (Pagination.activePage < 1) {
+            Pagination.activePage = 1;
         }
         Pagination.Start();
     },
       // end
     End: function(){
         Pagination.size = Pagination.sizeStatic;
-        Pagination.page = Pagination.sizeStatic;
+        Pagination.activePage = Pagination.sizeStatic;
         Pagination.Start();
     },  
 
     // next page
     Next: function() {
-       document.getElementById("botonNext").dataset.valor = Pagination.page;
-        Pagination.page++;
-        if (Pagination.page > Pagination.size) {
-            Pagination.page = Pagination.size;
+       document.getElementById("botonNext").dataset.valor = Pagination.activePage;
+        Pagination.activePage++;       
+        if (Pagination.activePage > Pagination.size) {
+          // ojo
+            Pagination.activePage = Pagination.size;
         }
-       
+        localStorage.setItem("activePage", Pagination.activePage);
         Pagination.Start();
     },
 
@@ -158,7 +161,7 @@ const Pagination = {
         var a = Pagination.menu.getElementsByTagName('a');
         
         for (var i = 0; i < a.length; i++) {
-            if (+a[i].innerHTML === Pagination.page) a[i].className = 'current';
+            if (+a[i].innerHTML === Pagination.activePage) a[i].className = 'current';
             
             a[i].addEventListener('click', Pagination.Click, false);
         }
@@ -173,6 +176,6 @@ const Pagination = {
 
      
     getActivePage: function(){        
-      return Pagination.page;
+      return Pagination.activePage;
     }
 };
