@@ -14,6 +14,9 @@ var init = function() {
 };
 init();
 }
+
+
+
 const Pagination = {
     code: '',
     

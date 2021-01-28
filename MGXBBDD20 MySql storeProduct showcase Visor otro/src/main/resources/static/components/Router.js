@@ -17,7 +17,11 @@ export async function Router(){
     const state = {
       data: {} ,
       menuPage: "FooterPage",
-      pageActive:1
+      visorSize: 2,
+      activePage: 1,
+      cacheSize: 5,
+      cacheInicio: 0,
+      cacheFinal: 1,
     }
     //Actualizar el State de forma reactiva
     const setState = obj => {
@@ -28,8 +32,8 @@ export async function Router(){
       }
     }
 //Obtenemos una copia inmutable del State
-  const getState = () => JSON.parse(JSON.stringify(state)); // de poco ingeniero   
-   // const getState = () => {... state }; por babel array si object NO
+  const getState = () => JSON.parse(JSON.stringify(state)); // de poco ingeniero   pero es inmutable 
+   // const getState = () => {... state }; por babel. Aqui vale para array si object NO
    //const getState = () => Object.assign({}, state); // Mutable
   // const getState = () => Object.create(state); // es mutable
 
@@ -60,7 +64,7 @@ export async function Router(){
               let visorSize =  localStorage.getItem("visorSize");
               let activePage =   localStorage.getItem("activePage");
               visorSize--;
-              if (sizeVisor > 0){
+              if (visorSize > 0){
                   let  url = api.API_HARNINA + activePage  + "&size=" +visorSize;
                   callApiRest(url);   
                   localStorage.setItem("visorSize",visorSize); 
@@ -112,6 +116,9 @@ export async function Router(){
         callApiRest(uri+document.getElementById("previousPage").dataset.valor+ "&size=6");
         break;
       case 'nextPage': 
+
+      // El marron
+
          callApiRest(uri+ document.getElementById("nextPage").dataset.valor+ "&size=6");
         break;
       case 'endPage': 
@@ -159,20 +166,26 @@ const renderShowcase = function(){
 }
 const render = function(showcase){
    let html = "";
-   let visorSize = lS.getItem("visorSize");
-   let activePage = sS.getItem("activePage");
-  let inicio = activePage == 1 ? 0 : (activePage * visorSize) - visorSize;
-  let final = inicio == 0 ?  visorSize -1 : inicio +  (visorSize - 1);
+   setState({visorSize: lS.getItem("visorSize"),activePage : lS.getItem("activePage")});
+ 
+  let inicio = getState().activePage == 1 ? 0 : (activePage * getState().visorSize) - getState().visorSize;
+  
+  let final = inicio == 0 ?  getState().visorSize -1 : inicio +  (getState().visorSize - 1);
+  setState({cacheInicio : inicio, cacheFinal:final});
+  console.log(getState().cacheInicio,",",getState().cacheFinal);
+
   const data = getState().data;
-  let subData = [];
+   console.log("/",data);      
 
-      for(let i = inicio; i<= final; i++){
-          subData.push(data.content[i]);
-      }
-
-      subData.forEach(post => {
+  let cache = [];
+     
+ for(let i = getState().cacheInicio; i<= getState().cacheFinal; i++){
+          cache.push(data.content[i]);
+ }
+ console.log("cache:", cache);
+ cache.forEach(post => {       
             html += showcase(post);
-        }); 
+ }); 
     return html;   
 }
 const renderShowcaseShmCarrusel = function(){
@@ -230,9 +243,7 @@ const renderMenuPage = function(){
 const  callApiRest = async function(uri){  
    await  ajax({
               url:uri,
-              cbSuccess : (posts)=>{
-                state.data = posts;
-                
+              cbSuccess : (posts)=>{             
                 setState({
                      data: posts 
                   });               
@@ -244,9 +255,8 @@ const  callApiRest = async function(uri){
         });
  document.querySelector(".loader").style.display = "none"; 
 }
- if(!hash || hash == "#/"){      
-    console.log("/",getState());
-     callApiRest(api.API_HARNINA);    
+ if(!hash || hash == "#/"){     
+     callApiRest(api.API_HARNINA);      
  }else if(hash.includes("#/post/")){ 
           console.log("/post/",getState());          
         const post = hash.split("/");
