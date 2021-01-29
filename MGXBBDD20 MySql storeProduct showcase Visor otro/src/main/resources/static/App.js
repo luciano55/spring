@@ -13,10 +13,10 @@ export function App(){
   if(!localStorage.getItem("visorSize")) {
    localStorage.setItem("visorSize",2);
   }
- localStorage.setItem("visorSize",2);
+localStorage.setItem("visorSize",2);
 localStorage.setItem("activePage",1);
+localStorage.setItem("cacheSize",5);
 
-const cacheSize = 5;
 
  const  $root = document.getElementById("root");
   $root.innerHTML = null;
@@ -24,6 +24,6 @@ const cacheSize = 5;
   $root.appendChild(Main());
   $root.appendChild(Loader());
   //$root.appendChild(FooterPage());
-  FooterPageButton(cacheSize);
+  FooterPageButton(localStorage.getItem("cacheSize"));
   Router();
 }

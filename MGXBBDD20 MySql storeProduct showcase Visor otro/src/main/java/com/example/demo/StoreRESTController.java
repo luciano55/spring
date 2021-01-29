@@ -45,7 +45,7 @@ public class StoreRESTController {
   }
 
   @RequestMapping(value = "/storerest/?page={num}&size={sizePage}", method = RequestMethod.GET)
-  public Page<Productstore> getPage(@RequestParam Map<String, Object> params) {
+  public Page<Productstore> getPages(@RequestParam Map<String, Object> params) {
     int pageNumber = (int) params.get("page");
     int size = (int) params.get("size");
 

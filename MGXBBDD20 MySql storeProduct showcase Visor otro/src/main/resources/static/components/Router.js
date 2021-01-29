@@ -16,12 +16,12 @@ export async function Router(){
     //El State
     const state = {
       data: {} ,
-      menuPage: "FooterPage",
-      visorSize: 2,
-      activePage: 1,
-      cacheSize: 5,
-      cacheInicio: 0,
-      cacheFinal: 1,
+      //menuPage: "FooterPage",
+      visorSize: "" ,//2,
+      activePage: "" , // 1,
+      cacheSize: "" , // 5,
+      cacheInicio: "" , // 0,
+      cacheFinal: "" , //: 1,  //cacheInicio + (  visorSize - 1)  //     
     }
     //Actualizar el State de forma reactiva
     const setState = obj => {
@@ -118,8 +118,20 @@ export async function Router(){
       case 'nextPage': 
 
       // El marron
+            // 1. Comprobar que no haya agotado los de cache
+          // Si quedan: avanzar
+               // Si hay suficientes pillarlos
+               //  No hay suficentes llamar a la API o BBDD
+           // Si no quedan llamar a la API o BBDD
 
+
+
+/*
          callApiRest(uri+ document.getElementById("nextPage").dataset.valor+ "&size=6");
+*/
+      
+
+     
         break;
       case 'endPage': 
         callApiRest(uri+document.getElementById("endPage").dataset.valor+ "&size=6");
@@ -168,22 +180,22 @@ const render = function(showcase){
    let html = "";
    setState({visorSize: lS.getItem("visorSize"),activePage : lS.getItem("activePage")});
  
-  let inicio = getState().activePage == 1 ? 0 : (activePage * getState().visorSize) - getState().visorSize;
-  
-  let final = inicio == 0 ?  getState().visorSize -1 : inicio +  (getState().visorSize - 1);
+  let inicio = (getState().activePage * getState().visorSize) - getState().visorSize;  
+  let final =  inicio +  (getState().visorSize - 1);
+
   setState({cacheInicio : inicio, cacheFinal:final});
   console.log(getState().cacheInicio,",",getState().cacheFinal);
 
   const data = getState().data;
-   console.log("/",data);      
+   console.log("/",data);     
 
-  let cache = [];
+  let activeData = [];
      
  for(let i = getState().cacheInicio; i<= getState().cacheFinal; i++){
-          cache.push(data.content[i]);
+          activeData.push(data.content[i]);
  }
- console.log("cache:", cache);
- cache.forEach(post => {       
+ console.log("cache:", activeData);
+ activeData.forEach(post => {       
             html += showcase(post);
  }); 
     return html;   

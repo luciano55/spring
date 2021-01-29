@@ -7,7 +7,7 @@ var init = function() {
    const visorSize  = localStorage.getItem("visorSize");
    const activePage = localStorage.getItem("activePage");
     Pagination.Init(document.getElementById('pagination'), {       
-        size: Math.ceil(cacheSize/visorSize), // pages size= rowsTotal / rowsPage
+        size: Math.ceil(cacheSize/visorSize), // pages size3= rowsTotal5 / rowsPage2
         activePage:  activePage, // selected page
         step: 1   // pages before and after current
     });
@@ -15,15 +15,13 @@ var init = function() {
 init();
 }
 
-
-
 const Pagination = {
     code: '',
     
-    Init: function(menu, data) {
+    Init: function(divPagination, data) {
         Pagination.Constructor(data);
-        Pagination.Create(menu);
-        Pagination.Start();
+        Pagination.Create(divPagination);
+        Pagination.showMenu();
     },
     Constructor: function(data) {
         data = data || {};
@@ -32,7 +30,7 @@ const Pagination = {
         Pagination.activePage = data.activePage || 1; 
         Pagination.step = data.step || 3;
     },
-   Create: function(menu) {
+   Create: function(divPagination) {
 
         var html = [
             '<div id="div_menu_page"><a>&#129092;</a>', // Inicio
@@ -42,12 +40,12 @@ const Pagination = {
             '<a>&#129094;</a></div>'  // End
         ];
 
-        menu.innerHTML = html.join('');
-        Pagination.menu = menu.getElementsByTagName('span')[0];
-        Pagination.Buttons(menu);
+        divPagination.innerHTML = html.join('');
+        Pagination.menuNumbers = divPagination.getElementsByTagName('span')[0];
+        Pagination.Buttons(divPagination);
     },
-   Buttons: function(menu) {
-        var nav = menu.getElementsByTagName('a');
+   Buttons: function(divPagination) {
+        var nav = divPagination.getElementsByTagName('a');
         nav[0].id = "botonInicio";
          nav[0].dataset.valor = 0;
         nav[0].addEventListener('click', Pagination.Inicio, false);
@@ -61,7 +59,7 @@ const Pagination = {
         nav[3].dataset.valor = Pagination.size - 1;
         nav[3].addEventListener('click', Pagination.End, false);
     },
-   Start: function() {
+  showMenu: function() {
         if (Pagination.activePage == 1) {
             document.getElementById('botonInicio').style.display ="none";
             document.getElementById('botonPrev').style.display ="none";
@@ -120,14 +118,14 @@ const Pagination = {
     Click: function(evt) {
        // alert(evt.currentTarget.innerHTML );
         Pagination.activePage = +this.innerHTML;
-        Pagination.Start();
+        Pagination.showMenu();
     },
     
     // inicio PAge
     Inicio: function(){
         Pagination.size = Pagination.sizeStatic;
         Pagination.activePage = 1;
-        Pagination.Start();
+        Pagination.showMenu();
     },
 
     // previous page
@@ -137,13 +135,13 @@ const Pagination = {
         if (Pagination.activePage < 1) {
             Pagination.activePage = 1;
         }
-        Pagination.Start();
+        Pagination.showMenu();
     },
       // end
     End: function(){
         Pagination.size = Pagination.sizeStatic;
         Pagination.activePage = Pagination.sizeStatic;
-        Pagination.Start();
+        Pagination.showMenu();
     },  
 
     // next page
@@ -155,24 +153,23 @@ const Pagination = {
             Pagination.activePage = Pagination.size;
         }
         localStorage.setItem("activePage", Pagination.activePage);
-        Pagination.Start();
+        Pagination.showMenu();
     },
 
 
     // binding pages
     Bind: function() {
-        var a = Pagination.menu.getElementsByTagName('a');
+        var a =  Pagination.menuNumbers.getElementsByTagName('a');
         
         for (var i = 0; i < a.length; i++) {
-            if (+a[i].innerHTML === Pagination.activePage) a[i].className = 'current';
-            
+          if (+a[i].innerHTML == Pagination.activePage) a[i].className = 'current';            
             a[i].addEventListener('click', Pagination.Click, false);
         }
     },
 
     // write pagination
     Finish: function() {
-        Pagination.menu.innerHTML = Pagination.code;
+        Pagination.menuNumbers.innerHTML = Pagination.code;
         Pagination.code = '';
         Pagination.Bind();
     },
