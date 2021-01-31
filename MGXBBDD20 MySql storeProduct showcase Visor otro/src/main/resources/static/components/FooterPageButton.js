@@ -1,16 +1,34 @@
-export function FooterPageButton(cacheSize){
+
+import api from "../helpers/harni_api.js";
+import {ajax} from "../helpers/ajax.js";
+import { Router } from "./Router.js";
+export async function FooterPageButton(){
 
   const $menu = document.createElement("footer");
   $menu.classList.add("footer");
 
-var init = function() {
-   const visorSize  = localStorage.getItem("visorSize");
-   const activePage = localStorage.getItem("activePage");
-    Pagination.Init(document.getElementById('pagination'), {       
-        size: Math.ceil(cacheSize/visorSize), // pages size3= rowsTotal5 / rowsPage2
-        activePage:  activePage, // selected page
-        step: 1   // pages before and after current
-    });
+var init =   async function() {
+  const  cacheSize  = localStorage.getItem("cacheSize"),
+            visorSize  = localStorage.getItem("visorSize"),
+            activePage = localStorage.getItem("activePage");
+   let totalElements = 0;  
+       await  ajax({
+                      url:api.API_HARNINA,
+                      cbSuccess : (posts)=>{             
+                          totalElements = posts.totalElements;   
+                          Pagination.Init(document.getElementById('pagination'), {       
+                                          totalPage:  Math.ceil(totalElements/visorSize), 
+                                          activePage:  activePage, 
+                                          step: 1,  // pages before and after current
+                                          totalElements: totalElements,
+                                          cacheSize : cacheSize
+                            });
+                            Router();
+                      }
+             }); 
+        //alert(totalElements); 
+  // Podriamos hacer un acceso previo a los datos para conocer el total de elementos
+    
 };
 init();
 }
@@ -25,8 +43,8 @@ const Pagination = {
     },
     Constructor: function(data) {
         data = data || {};
-        Pagination.sizeStatic = data.size || 30;
-        Pagination.size = data.size || 30;
+        Pagination.sizeStatic = data.totalPage;
+        Pagination.totalPage = data.totalPage;
         Pagination.activePage = data.activePage || 1; 
         Pagination.step = data.step || 3;
     },
@@ -59,7 +77,8 @@ const Pagination = {
         nav[3].dataset.valor = Pagination.size - 1;
         nav[3].addEventListener('click', Pagination.End, false);
     },
-  showMenu: function() {
+  showMenu: function() {        
+        
         if (Pagination.activePage == 1) {
             document.getElementById('botonInicio').style.display ="none";
             document.getElementById('botonPrev').style.display ="none";
@@ -75,16 +94,16 @@ const Pagination = {
             document.getElementById('botonEnd').style.display ="";
         }        
         
-        if (Pagination.size < Pagination.step * 2 + 6) {
-            Pagination.Add(1, Pagination.size + 1);
+        if (Pagination.totalPage < Pagination.step * 2 + 6) {
+            Pagination.Add(1, Pagination.totalPage + 1);
         }
         else if (Pagination.activePage < Pagination.step * 2 + 1) {
             Pagination.Add(1, Pagination.step * 2 + 4);
             Pagination.Last();
         }
-        else if (Pagination.activePage > Pagination.size - Pagination.step * 2) {
+        else if (Pagination.activePage > Pagination.totalPage - Pagination.step * 2) {
             Pagination.First();
-            Pagination.Add(Pagination.size - Pagination.step * 2 - 2, Pagination.size + 1);
+            Pagination.Add(Pagination.totalPage - Pagination.step * 2 - 2, Pagination.totalPage + 1);
         }
         else {
             Pagination.First();
@@ -101,7 +120,7 @@ const Pagination = {
     },
     // add last page with separator
     Last: function() {
-        Pagination.code += '<i>...</i><a>' + Pagination.size + '</a>';
+        Pagination.code += '<i>...</i><a>' + Pagination.totalPage + '</a>';
     },
 
     // add first page with separator
@@ -123,7 +142,7 @@ const Pagination = {
     
     // inicio PAge
     Inicio: function(){
-        Pagination.size = Pagination.sizeStatic;
+        Pagination.totalPage= Pagination.sizeStatic;
         Pagination.activePage = 1;
         Pagination.showMenu();
     },
@@ -139,7 +158,7 @@ const Pagination = {
     },
       // end
     End: function(){
-        Pagination.size = Pagination.sizeStatic;
+        Pagination.totalPage = Pagination.sizeStatic;
         Pagination.activePage = Pagination.sizeStatic;
         Pagination.showMenu();
     },  
@@ -148,9 +167,9 @@ const Pagination = {
     Next: function() {
        document.getElementById("botonNext").dataset.valor = Pagination.activePage;
         Pagination.activePage++;       
-        if (Pagination.activePage > Pagination.size) {
+        if (Pagination.activePage > Pagination.totalPage) {
           // ojo
-            Pagination.activePage = Pagination.size;
+            Pagination.activePage = Pagination.totalPage;
         }
         localStorage.setItem("activePage", Pagination.activePage);
         Pagination.showMenu();

@@ -17,9 +17,10 @@ export async function Router(){
     const state = {
       data: {} ,
       //menuPage: "FooterPage",
-      visorSize: "" ,//2,
-      activePage: "" , // 1,
-      cacheSize: "" , // 5,
+      visorSize: 2 ,//2,
+      activePage: "" , 
+      activePageCache: 1 ,
+      cacheSize: "" , // 4,
       cacheInicio: "" , // 0,
       cacheFinal: "" , //: 1,  //cacheInicio + (  visorSize - 1)  //     
     }
@@ -87,10 +88,12 @@ export async function Router(){
               break; 
       }  
    });
-  $("div_menu_page").addEventListener("click",(e)=>{
-       let uri = api.API_HARNINA;
 
-        const pageActive= e.target.innerHTML;
+  $("div_menu_page").addEventListener("click",(e)=>{
+       let uri =  "http://localhost:8085/storerest/?";
+
+        const pageActive= +e.target.innerHTML;
+
         if(pageActive>0){
           callApiRest(uri+(pageActive - 1));        }
  
@@ -102,7 +105,33 @@ export async function Router(){
           callApiRest(uri+document.getElementById("botonEnd").dataset.valor+ "&size=6");
           break;
      case 'botonNext':
-         callApiRest(uri+document.getElementById("botonNext").dataset.valor+ "&size=6");
+
+
+      // El marron
+            // 1. Comprobar que no haya agotado los de cache
+          // Si quedan: avanzar
+               // Si hay suficientes pillarlos
+               //  No hay suficentes llamar a la API o BBDD
+           // Si no quedan llamar a la API o BBDD
+         const   nextPage = document.getElementById("botonNext").dataset.valor,
+                    cacheLength = +getState().data.content.length,
+                     cacheInicio = +getState().cacheInicio,
+                     cacheFinal = +getState().cacheFinal,
+                     visorSize =   +getState().visorSize;
+                      
+          if (cacheLength >   (cacheFinal + visorSize)) {
+            setState({cacheInicio : cacheFinal + 1, cacheFinal: cacheFinal + visorSize});
+           // alert("avanzamos: " + getState().cacheFinal);
+            renderShowcase();
+          }else {    
+            alert("Se agotó la cache");
+            setState({activePageCache : 1});
+            callApiRest(uri+"page="+ nextPage + "&size="+visorSize );
+
+          }
+
+     
+         //callApiRest(uri+document.getElementById("botonNext").dataset.valor+ "&size=6");
           break;
 
      case 'botonPrev':
@@ -116,23 +145,8 @@ export async function Router(){
         callApiRest(uri+document.getElementById("previousPage").dataset.valor+ "&size=6");
         break;
       case 'nextPage': 
-
-      // El marron
-            // 1. Comprobar que no haya agotado los de cache
-          // Si quedan: avanzar
-               // Si hay suficientes pillarlos
-               //  No hay suficentes llamar a la API o BBDD
-           // Si no quedan llamar a la API o BBDD
-
-
-
-/*
          callApiRest(uri+ document.getElementById("nextPage").dataset.valor+ "&size=6");
-*/
-      
-
-     
-        break;
+         break;
       case 'endPage': 
         callApiRest(uri+document.getElementById("endPage").dataset.valor+ "&size=6");
         break;  
@@ -179,25 +193,28 @@ const renderShowcase = function(){
 const render = function(showcase){
    let html = "";
    setState({visorSize: lS.getItem("visorSize"),activePage : lS.getItem("activePage")});
+  
  
-  let inicio = (getState().activePage * getState().visorSize) - getState().visorSize;  
+  let inicio = (getState().activePageCache * getState().visorSize) - getState().visorSize;  
   let final =  inicio +  (getState().visorSize - 1);
 
   setState({cacheInicio : inicio, cacheFinal:final});
-  console.log(getState().cacheInicio,",",getState().cacheFinal);
+  //console.log(getState().cacheInicio,",",getState().cacheFinal);
+console.log(inicio,",",final);
 
   const data = getState().data;
-   console.log("/",data);     
+   console.log("data:",data);     
 
   let activeData = [];
      
- for(let i = getState().cacheInicio; i<= getState().cacheFinal; i++){
+ for(let i = inicio; i<= final; i++){
           activeData.push(data.content[i]);
  }
- console.log("cache:", activeData);
+ console.log("activeData(cache):", activeData);
  activeData.forEach(post => {       
             html += showcase(post);
  }); 
+  setState({activePageCache : getState().activePageCache + 1});
     return html;   
 }
 const renderShowcaseShmCarrusel = function(){
@@ -257,18 +274,16 @@ const  callApiRest = async function(uri){
               url:uri,
               cbSuccess : (posts)=>{             
                 setState({
-                     data: posts 
-                  });               
-              
-               //  if(getState().menuPage == "FooterPage"){renderMenuPage();}              
-               
+                     data: posts                     
+                  });              
                  renderShowcase();              
               }
         });
  document.querySelector(".loader").style.display = "none"; 
 }
  if(!hash || hash == "#/"){     
-     callApiRest(api.API_HARNINA);      
+     callApiRest(api.API_HARNINA);    
+       
  }else if(hash.includes("#/post/")){ 
           console.log("/post/",getState());          
         const post = hash.split("/");
