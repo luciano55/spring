@@ -12,17 +12,17 @@ import { MyImageSlider } from "../showcase/imageSlider/myImageSlider.js";
 
 
 export async function Router(){
-  
-    //El State
     const state = {
       data: {} ,
+      godata:{},
       visorSize: localStorage.getItem("visorSize"), 
-      activePageCache: localStorage.getItem("activePage"),
+      activePage: localStorage.getItem("activePage"),
+      activePageCache: 1,     
       cacheSize: localStorage.getItem("cacheSize"),
       cacheInicio: 0, 
       cacheFinal: localStorage.getItem("visorSize") -1
     }
-    //Actualizar el State de forma reactiva
+
     const setState = obj => {
       for (let key in obj) {
         if (state.hasOwnProperty(key)) {
@@ -30,11 +30,8 @@ export async function Router(){
         }
       }
     }
-//Obtenemos una copia inmutable del State
-  const getState = () => JSON.parse(JSON.stringify(state)); // de poco ingeniero   pero es inmutable 
-   // const getState = () => {... state }; por babel. Aqui vale para array si object NO
-   //const getState = () => Object.assign({}, state); // Mutable
-  // const getState = () => Object.create(state); // es mutable
+
+  const getState = () => JSON.parse(JSON.stringify(state)); 
 
   if(!localStorage.getItem("showcaseType")){
         localStorage.setItem("showcaseType", "showcaseshmJM"); 
@@ -92,74 +89,100 @@ export async function Router(){
 
         const pageActive= +e.target.innerHTML;
 
-        if(pageActive>0){
-          callApiRest(uri+(pageActive - 1));        }
+        if(pageActive>0){callApiRest(uri+(pageActive - 1));        }
+
+        const   cacheLength = +getState().data.content.length,
+                    cacheInicio = +getState().cacheInicio,
+                     cacheFinal = +getState().cacheFinal,
+                     visorSize =   +getState().visorSize,
+                     activePageCache = +getState().activePageCache,
+                     cacheSize = +getState().cacheSize;
+
+
  
      switch (e.target.id ) {
       case 'botonInicio':
           callApiRest(uri+document.getElementById("botonInicio").dataset.valor + "&size=6");
           break;
       case 'botonEnd':
-          callApiRest(uri+document.getElementById("botonEnd").dataset.valor+ "&size=6");
-          break;
-     case 'botonNext':
-      // El marron
-            // 1. Comprobar que no haya agotado los de cache
-          // Si quedan: avanzar
-               // Si hay suficientes pillarlos
-               //  No hay suficentes llamar a la API o BBDD
-           // Si no quedan llamar a la API o BBDD
-           
-         const   nextPage = +document.getElementById("botonNext").dataset.valor,
-                      cacheLength = +getState().data.content.length,
-                     cacheInicio = +getState().cacheInicio,
-                     cacheFinal = +getState().cacheFinal,
-                     visorSize =   +getState().visorSize,
-                     activePageCache = +getState().activePageCache,
-                     cacheSize = +getState().cacheSize;
-                     alert("cacheInicio:" + cacheInicio + "cacheFinal:" + cacheFinal+ "nextPage:" + nextPage + "activePageCache: " + activePageCache );
+        let endPage = +document.getElementById("botonEnd").dataset.valor;
+        
+           //alert("cacheInicio:" + cacheInicio + "cacheFinal:" + cacheFinal+ "nextPage:" + nextPage + "activePageCache: " + activePageCache );     
+           //endPage--;
 
-          
+           
+           // si ultimapagetransferida  = newpage
+           const lastPageActive =+localStorage.getItem("activePage");
+        //   alert("endPage:" + endPage +"lastPageActive:" + lastPageActive);
+
+              const endPageTransferred =  Math.ceil(((lastPageActive) * visorSize)/(visorSize*2)) -1;
+
+             const newPageToTransferred =  Math.ceil(((endPage) * visorSize)/(visorSize*2)) -1;
+           alert("endPage:" + endPage  + "endPageTransferred: " +endPageTransferred + "   newPageToTransferred: " + newPageToTransferred + "lastPageActive:" + lastPageActive);
+let inicio, final;
+           if(endPageTransferred == newPageToTransferred ){
+              alert("Estoy en la misma cache");
+                    // ir al último registro de la cache
+                   
+
+           }else {
+                        alert("Estoy en otra cache");
+                       const size =  getState().cacheSize,
+                                 visorSize = getState().visorSize,
+                                 endPage = +document.getElementById("botonEnd").dataset.valor,     
+                                 page =  Math.ceil(((endPage) * visorSize)/(visorSize*2))-1 ;  
+
+     callGoApiRest("http://localhost:8085/storerest/?page=" +page+"&size="+size ); 
+
+           }
+
+             if(cacheLength <= visorSize ){
+                                        inicio = 0;
+                                        final = cacheLength -1;
+                    }else {
+                      inicio = Math.ceil(cacheLength / visorSize) ;
+                      final = cacheSize -  (cacheSize - cacheLength) - 1;
+                    }
+                     alert("inicio: " + inicio +"    final: "+ final);
+
+                setState({activePageCache : 2,cacheInicio :inicio,cacheFinal:final});
+               
+                    renderShowcase();  
+
+        
+          break;
+     case 'botonNext':        
+         const nextPage = +document.getElementById("botonNext").dataset.valor;
+                    
+                  //   alert("cacheInicio:" + cacheInicio + "cacheFinal:" + cacheFinal+ "nextPage:" + nextPage + "activePageCache: " + activePageCache );       
                       
           if (cacheLength >   (cacheFinal + visorSize) || cacheLength < cacheSize )
           {
-                //  setState({cacheInicio : cacheFinal <0 ? 0 : cacheFinal +1, cacheFinal: cacheFinal + visorSize});
-
-                if(cacheLength < cacheSize ) {
+               if(cacheLength < cacheSize ) {
                         setState({cacheInicio : cacheFinal +1, cacheFinal: cacheFinal + 
                 Math.floor(cacheLength / visorSize) ,activePageCache: activePageCache +1})
                 }else {
                         setState({cacheInicio : cacheFinal +1, cacheFinal: cacheFinal+ visorSize ,activePageCache: activePageCache +1});
                 }
-                  alert("avanzamos hasta la última: " + getState().cacheFinal);
+              //    alert("avanzamos hasta la última: " + getState().cacheFinal);
                   renderShowcase();
           }else           
           {    
-            alert("Se agotó la cache");
+            //alert("Se agotó la cache");
             setState({activePageCache : 1,cacheInicio :0,cacheFinal:visorSize-1});
-            /*
-            let inicio = 0;
-            let final =  -1;
-            setState({cacheInicio : inicio, cacheFinal:final});*/
-           // alert("nextPage: " + nextPage + "cacheSize: " +getState().cacheSize);const
+          const page =  Math.ceil(((nextPage) * visorSize)/(visorSize*2)) ;
+          //alert("PAge:" + page);
            
-          //const page = (C + 1) < visorSize ? 0 : Math.floor(nextPage/ visorSize);
-          // const page =  Math.floor((nextPage+1) / visorSize);
-              const page =  Math.ceil(((nextPage+1) * visorSize)/(visorSize*2)) -1;
-
-           alert("page:" + page+ " visorSize:" + visorSize);
             callApiRest(uri+"page="+ page + "&size="+getState().cacheSize );
 
           }
-
-     
-         //callApiRest(uri+document.getElementById("botonNext").dataset.valor+ "&size=6");
+       
           break;
 
      case 'botonPrev':
          callApiRest(uri+document.getElementById("botonPrev").dataset.valor+ "&size=6");
           break;
-
+/*
       case 'firstPage': 
         callApiRest(uri);
          break;
@@ -171,7 +194,7 @@ export async function Router(){
          break;
       case 'endPage': 
         callApiRest(uri+document.getElementById("endPage").dataset.valor+ "&size=6");
-        break;  
+        break;  */
      }  
    });
 
@@ -212,17 +235,12 @@ const renderShowcase = function(){
    }
                   
 }
-const render = function(showcase){
-   let html = "";
-   setState({visorSize: lS.getItem("visorSize"),cacheSize : lS.getItem("cacheSize")}); // Por si modifican el visor y cache
-
+const  preRender = function(){
+     setState({visorSize: lS.getItem("visorSize"),cacheSize : lS.getItem("cacheSize")}); 
  
   let inicio = getState().cacheInicio;  
-  let final =  getState().cacheFinal;
-
- //setState({cacheInicio : inicio, cacheFinal:final});
- //console.log(getState().cacheInicio,",",getState().cacheFinal);
-console.log(inicio,",",final);
+  let final =  getState().cacheFinal;  
+  console.log(inicio,",",final);
 
   const data = getState().data;
    console.log("data:",data);     
@@ -233,11 +251,15 @@ console.log(inicio,",",final);
           activeData.push(data.content[i]);
  }
  console.log("activeData(cache):", activeData);
+return activeData;
+}
+const render = function(showcase){
+   let html = "";
+const activeData = preRender();
  activeData.forEach(post => {       
             html += showcase(post);
  }); 
-  //setState({activePageCache : getState().activePageCache + 1});
-    return html;   
+ return html;   
 }
 const renderShowcaseShmCarrusel = function(){
     let html = "";
@@ -246,10 +268,10 @@ const renderShowcaseShmCarrusel = function(){
     $giran.id = "giran";
     document.getElementById("main").appendChild($giran);
     $giran  = document.getElementById("giran");
-    const data = getState().data;
+    const activeData = preRender();
     let i = 0;
-    data.content.forEach(post => {
-          $giran.appendChild(Carrusel(post, i, data.content.length));       
+    activeData.forEach(post => {
+          $giran.appendChild(Carrusel(post, i, activeData.length));       
            i++;        
      });      
 
@@ -269,28 +291,6 @@ const renderDetail = async function(id){
         document.getElementById("changeshowcase").style.display ="none";
         document.querySelector(".loader").style.display = "none";
 }
-const renderMenuPage = function(){
-    const posts =  getState().data;
-       console.log(posts);
-       document.getElementById("currentPage").innerHTML = posts.pageable.pageNumber + 1;
-       if  (posts.first){
-             document.getElementById("firstPage").style.display = "none";
-             document.getElementById("previousPage").style.display = "none";
-       }else {
-           document.getElementById("previousPage").dataset.valor = posts.pageable.pageNumber - 1;
-          document.getElementById("firstPage").style.display = "block";
-          document.getElementById("previousPage").style.display = "block";
-      }
-      if  (posts.last) {
-          document.getElementById("nextPage").style.display = "none";
-          document.getElementById("endPage").style.display = "none";
-      }else {         
-          document.getElementById("nextPage").dataset.valor = posts.pageable.pageNumber + 1;
-           document.getElementById("endPage").dataset.valor = posts.totalPages - 1;
-          document.getElementById("nextPage").style.display = "block";
-          document.getElementById("endPage").style.display = "block";
-       }                  
-}
 const  callApiRest = async function(uri){  
    await  ajax({
               url:uri,
@@ -304,9 +304,22 @@ const  callApiRest = async function(uri){
         });
  document.querySelector(".loader").style.display = "none"; 
 }
+const  callGoApiRest = async function(uri){  
+   await  ajax({
+              url:uri,
+              cbSuccess : (posts)=>{             
+            //  console.log("callGoApiRest:" , posts)
+                setState({
+                     data: posts                     
+                  });    
+                    console.log("callGoApiRest data:" , getState().data) ;         
+              }
+        });
+ document.querySelector(".loader").style.display = "none"; 
+}
  if(!hash || hash == "#/"){     
-   const size =  localStorage.getItem("cacheSize");
-     callApiRest("http://localhost:8085/storerest/?page=0&size="+size );    
+   
+     callApiRest("http://localhost:8085/storerest/?page=0&size="+getState().cacheSize);    
        
  }else if(hash.includes("#/post/")){ 
           console.log("/post/",getState());          

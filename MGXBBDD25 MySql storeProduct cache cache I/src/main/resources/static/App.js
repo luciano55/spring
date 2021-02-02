@@ -9,7 +9,7 @@ import { FooterPageButton } from "./components/FooterPageButton.js";
 
 export function App(){
 
-  const visorSize =1, 
+  const visorSize =2, 
    cacheSize = visorSize * 2;
         
 

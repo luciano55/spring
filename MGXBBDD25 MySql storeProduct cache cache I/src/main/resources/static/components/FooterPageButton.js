@@ -14,13 +14,13 @@ var init =   async function() {
                       url:api.API_HARNINA,
                       cbSuccess : (posts)=>{             
                        let   totalElements = posts.totalElements;   
-                       //console.log("posts:",posts);
+                     console.log("posts:",posts);
                           Pagination.Init(document.getElementById('pagination'), {       
                                           totalPage:  Math.ceil(totalElements/visorSize), 
                                           activePage, 
                                           step
                             });
-                         Router();
+                       Router();
                       }
              });    
 };
@@ -63,10 +63,10 @@ const Pagination = {
         nav[1].dataset.valor = 0;
         nav[1].addEventListener('click', Pagination.prev, false);
         nav[2].id = "botonNext";
-        nav[2].dataset.valor = 1;
+        nav[2].dataset.valor = 2;
         nav[2].addEventListener('click', Pagination.next, false);
         nav[3].id = "botonEnd";
-        nav[3].dataset.valor = Pagination.size - 1;
+        nav[3].dataset.valor =  Pagination.totalPage;
         nav[3].addEventListener('click', Pagination.end, false);
     },    
    showMenu: function() {        
@@ -119,8 +119,6 @@ const Pagination = {
     addFirst: function() {
         Pagination.code += '<a>1</a><i>...</i>';
     },
-
-
   
     inicio: function(){
         Pagination.activePage = 1;
@@ -148,8 +146,6 @@ const Pagination = {
         localStorage.setItem("activePage", Pagination.activePage);
         Pagination.showMenu();
     },
-
-
 
 
    setActivePage: function(evt) {     
